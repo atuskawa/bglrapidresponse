@@ -1,0 +1,181 @@
+.page {
+  color: var(--operator-ink);
+
+  background:
+    radial-gradient(circle at 50% -15%, rgb(255 255 255 / 75%), transparent 45%),
+    linear-gradient(145deg, #b9b0a2, #e3ded5 48%, #aaa095);
+}
+
+.content {
+  width: min(100% - 2rem, 26rem);
+}
+
+/* Raised vintage control panel */
+.page .panel {
+  position: relative;
+
+  border: 1px solid #fffdf8;
+  border-radius: 1.25rem;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf8f2 0%,
+      #e8e2d7 45%,
+      #cbc2b3 100%
+    );
+
+  box-shadow:
+    /* hard physical drop shadow */
+    12px 14px 0 rgb(83 72 57 / 12%),
+    14px 17px 28px rgb(38 31 22 / 32%),
+
+    /* upper-left lighting */
+    -6px -6px 16px rgb(255 255 255 / 72%),
+
+    /* bevel */
+    inset 2px 2px 0 rgb(255 255 255 / 90%),
+    inset -2px -2px 0 rgb(80 68 52 / 18%);
+}
+
+/* Inner bevel around the panel */
+.page .panel::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  pointer-events: none;
+
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 0.95rem;
+
+  box-shadow:
+    inset 0 1px 2px rgb(255 255 255 / 70%),
+    inset 0 -1px 2px rgb(75 63 48 / 12%);
+}
+
+/* Recessed text field */
+.page .input {
+  border: 1px solid #aaa092;
+  border-radius: 0.65rem;
+
+  color: var(--operator-ink);
+
+  background:
+    linear-gradient(
+      180deg,
+      #c9c1b5 0%,
+      #e8e3db 13%,
+      #faf9f5 100%
+    );
+
+  box-shadow:
+    /* deep recessed cavity */
+    inset 3px 4px 8px rgb(69 59 48 / 28%),
+    inset -2px -2px 5px rgb(255 255 255 / 90%),
+
+    /* physical rim */
+    0 1px 0 rgb(255 255 255 / 80%);
+
+  text-shadow: 0 1px 0 #fff;
+}
+
+.page .input:focus-visible {
+  outline: 2px solid var(--operator-accent);
+  outline-offset: 2px;
+
+  box-shadow:
+    inset 3px 4px 8px rgb(69 59 48 / 25%),
+    inset -2px -2px 5px rgb(255 255 255 / 90%),
+    0 0 0 3px rgb(64 90 169 / 18%);
+}
+
+/* Physical blue push button */
+.page .submit {
+  border: 1px solid #182d68;
+  border-radius: 0.7rem;
+
+  color: #f8faff;
+
+  background:
+    linear-gradient(
+      145deg,
+      #637cc0 0%,
+      #405aa9 45%,
+      #2d4688 100%
+    );
+
+  box-shadow:
+    /* physical bottom edge */
+    4px 5px 0 #1f3265,
+
+    /* ambient shadow */
+    6px 8px 12px rgb(38 31 22 / 28%),
+
+    /* top bevel */
+    inset 1px 1px 0 rgb(255 255 255 / 65%),
+
+    /* bottom bevel */
+    inset -1px -2px 0 rgb(15 25 55 / 35%);
+
+  text-shadow:
+    0 1px 1px rgb(0 0 0 / 45%);
+
+  transition:
+    transform 100ms ease,
+    box-shadow 100ms ease,
+    filter 100ms ease;
+}
+
+/* Button lifts slightly */
+.page .submit:not(:disabled):hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    4px 6px 0 #1f3265,
+    7px 10px 14px rgb(38 31 22 / 30%),
+    inset 1px 1px 0 rgb(255 255 255 / 72%),
+    inset -1px -2px 0 rgb(15 25 55 / 35%);
+}
+
+/* Button physically depresses */
+.page .submit:not(:disabled):active {
+  transform: translateY(3px);
+
+  box-shadow:
+    1px 2px 0 #1f3265,
+    2px 3px 6px rgb(38 31 22 / 24%),
+    inset 2px 3px 6px rgb(20 25 40 / 28%),
+    inset -1px -1px 0 rgb(255 255 255 / 35%);
+}
+
+.page .submit:disabled {
+  cursor: wait;
+  opacity: 0.7;
+  filter: saturate(0.45);
+}
+
+/* Recessed warning plate */
+.page .error {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+
+  border: 1px solid #bd918a;
+  border-radius: 0.6rem;
+
+  color: #762b25;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff8f5 0%,
+      #f2dcd7 55%,
+      #dfc1bc 100%
+    );
+
+  box-shadow:
+    inset 2px 2px 5px rgb(255 255 255 / 85%),
+    inset -2px -2px 5px rgb(115 45 38 / 12%),
+    0 1px 2px rgb(65 40 35 / 18%);
+
+  text-shadow: 0 1px 0 #fff;
+}

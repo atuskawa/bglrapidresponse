@@ -34,11 +34,15 @@ export default function EmergencyList({
 }: EmergencyListProps) {
   const [requests, setRequests] = useState<EmergencyRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [realtimeWarning, setRealtimeWarning] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [retryKey, setRetryKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
+    let isMounted = true;
 
     async function fetchExistingRequests() {
       const { data, error } = await supabase
@@ -51,14 +55,22 @@ export default function EmergencyList({
 
       if (error) {
         console.error("Error loading emergencies:", error);
+        if (isMounted) setLoadError("Could not load emergency requests. Retrying...");
       } else {
-        setRequests((data ?? []) as EmergencyRequest[]);
+        if (isMounted) {
+          setRequests((data ?? []) as EmergencyRequest[]);
+          setLoadError(null);
+        }
       }
 
-      setLoading(false);
+      if (isMounted) setLoading(false);
     }
 
-    fetchExistingRequests();
+    void fetchExistingRequests();
+
+    const refreshInterval = window.setInterval(() => {
+      void fetchExistingRequests();
+    }, 5000);
 
     const channel = supabase
       .channel("operator-emergency-requests")
@@ -69,68 +81,28 @@ export default function EmergencyList({
           schema: "public",
           table: "tbl_emergency_req",
         },
-        async (payload) => {
-          if (
-            payload.eventType === "UPDATE" ||
-            payload.eventType === "DELETE"
-          ) {
-            const updatedRow = payload.new as {
-              status?: string;
-            };
-
-            if (
-              payload.eventType === "DELETE" ||
-              updatedRow.status !== "PENDING"
-            ) {
-              setRequests((current) =>
-                current.filter((request) => request.id !== payload.old.id)
-              );
-            }
-
-            return;
-          }
-
-          if (payload.eventType === "INSERT") {
-            const residentId = payload.new.resident_id;
-
-            const { data: resident, error } = await supabase
-              .from("tbl_resident")
-              .select("id, first_name, middle_name, last_name, suffix")
-              .eq("id", residentId)
-              .single();
-
-            if (error || !resident) {
-              console.error("Could not fetch resident details:", error);
-              return;
-            }
-
-            const newRequest: EmergencyRequest = {
-              id: payload.new.id,
-              emerg_category: payload.new.emerg_category,
-              status: payload.new.status,
-              resident,
-            };
-
-            if (newRequest.status === "PENDING") {
-              setRequests((current) => {
-                if (
-                  current.some((request) => request.id === newRequest.id)
-                ) {
-                  return current;
-                }
-
-                return [newRequest, ...current];
-              });
-            }
-          }
-        }
+        () => void fetchExistingRequests()
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (!isMounted) return;
+
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("Emergency request realtime subscription failed:", error);
+          setRealtimeWarning(
+            "Live updates are unavailable. Requests will refresh automatically."
+          );
+        } else if (status === "SUBSCRIBED") {
+          setRealtimeWarning(null);
+          void fetchExistingRequests();
+        }
+      });
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      window.clearInterval(refreshInterval);
+      void supabase.removeChannel(channel);
     };
-  }, []);
+  }, [retryKey]);
 
   function getFullName(resident: Resident) {
     return [
@@ -167,29 +139,39 @@ export default function EmergencyList({
     return <p>Loading emergency requests...</p>;
   }
 
-  if (requests.length === 0) {
-    return <p>No pending emergency requests.</p>;
-  }
-
   return (
     <section>
       <h2>Active Requests</h2>
 
-      {requests.map((request) => (
-        <article key={request.id}>
-          <p>Category: {request.emerg_category}</p>
-          <p>ID: {request.id}</p>
-          <p>Caller: {getFullName(request.resident)}</p>
-
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => handleAccept(request.id)}
-          >
-            {isPending ? "Connecting..." : "Accept Call"}
+      {realtimeWarning && <p role="status">{realtimeWarning}</p>}
+      {loadError && (
+        <p role="alert">
+          {loadError}{" "}
+          <button type="button" onClick={() => setRetryKey((key) => key + 1)}>
+            Retry now
           </button>
-        </article>
-      ))}
+        </p>
+      )}
+
+      {requests.length === 0 ? (
+        <p>{loadError ? "Requests will appear when the connection recovers." : "No pending emergency requests."}</p>
+      ) : (
+        requests.map((request) => (
+          <article key={request.id}>
+            <p>Category: {request.emerg_category}</p>
+            <p>ID: {request.id}</p>
+            <p>Caller: {getFullName(request.resident)}</p>
+
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => handleAccept(request.id)}
+            >
+              {isPending ? "Connecting..." : "Accept Call"}
+            </button>
+          </article>
+        ))
+      )}
     </section>
   );
 }

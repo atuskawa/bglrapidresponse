@@ -1,6 +1,61 @@
  import Link from "next/link";
- 
- export default function GeneralInformation() {
+ import type { Dispatch, FormEventHandler, SetStateAction } from "react";
+
+ type Sex = "MALE" | "FEMALE";
+
+ interface GeneralInformationProps {
+     handleSubmit: FormEventHandler<HTMLFormElement>;
+     firstName: string;
+     setFirstName: Dispatch<SetStateAction<string>>;
+     middleName: string;
+     setMiddleName: Dispatch<SetStateAction<string>>;
+     lastName: string;
+     setLastName: Dispatch<SetStateAction<string>>;
+     suffix: string;
+     setSuffix: Dispatch<SetStateAction<string>>;
+     email: string;
+     setEmail: Dispatch<SetStateAction<string>>;
+     phone: string;
+     setPhone: Dispatch<SetStateAction<string>>;
+     age: number | "";
+     setAge: Dispatch<SetStateAction<number | "">>;
+     sex: Sex | "";
+     setSex: Dispatch<SetStateAction<Sex | "">>;
+     password: string;
+     setPassword: Dispatch<SetStateAction<string>>;
+     confirmPassword: string;
+     setConfirmPassword: Dispatch<SetStateAction<string>>;
+     loading: boolean;
+     error: string;
+     message: string;
+ }
+
+ export default function GeneralInformation({
+     handleSubmit,
+     firstName,
+     setFirstName,
+     middleName,
+     setMiddleName,
+     lastName,
+     setLastName,
+     suffix,
+     setSuffix,
+     email,
+     setEmail,
+     phone,
+     setPhone,
+     age,
+     setAge,
+     sex,
+     setSex,
+     password,
+     setPassword,
+     confirmPassword,
+     setConfirmPassword,
+     loading,
+     error,
+     message,
+ }: GeneralInformationProps) {
     return (    
         <>
             <form onSubmit={handleSubmit}>
@@ -52,7 +107,12 @@
 
                 <div className="form-row">
                     <label htmlFor="sex">Sex</label>
-                    <select id="sex" name="sex" required value={sex || ""} onChange={(e) => setSex(e.target.value as Sex)}>
+                    <select id="sex" name="sex" required value={sex} onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "MALE" || value === "FEMALE" || value === "") {
+                            setSex(value);
+                        }
+                    }}>
                         <option value="">Select sex</option>
                         <option value="MALE">Male</option>
                         <option value="FEMALE">Female</option>

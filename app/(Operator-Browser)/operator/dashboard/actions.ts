@@ -22,14 +22,6 @@ export async function acceptEmergencyRequest(requestId: number) {
   
   const operator = operatorData as Operator;
 
-  const { data: updatedRows, error: updateError } = await supabase.from("tbl_emergency_req").update({ status: "ACTIVE", operator_id: operator.id }).eq("id", requestId).eq("status", "PENDING").select();
-
-  if (!updatedRows || updatedRows.length === 0) {
-    throw new Error("This emergency request has already been claimed by another operator.");
-  }
-
-
-  if (updateError) throw new Error("Failed to claim emergency request.");
 
 
   const roomName = `emergency-${requestId}`;

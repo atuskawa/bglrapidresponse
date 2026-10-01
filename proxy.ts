@@ -2,11 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,19 +11,19 @@ export async function proxy(request: NextRequest) {
       cookies: {
         getAll: () => request.cookies.getAll(),
 
-        setAll: (cookiesToSet) => {
+        setAll: (cookiesToSet, headers) => {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value)
           })
 
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
+          response = NextResponse.next({ request })
 
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
+          })
+
+          Object.entries(headers).forEach(([name, value]) => {
+            response.headers.set(name, value)
           })
         },
       },
@@ -55,7 +51,7 @@ export async function proxy(request: NextRequest) {
 
   //default paths based on role
   if (pathname === '/') {
-    if (role === 'resident') return NextResponse.redirect(new URL('/resident/dashboard', request.url));
+    if (role === 'resident') return NextResponse.redirect(new URL('/resident/report', request.url));
     if (role === 'operator') return NextResponse.redirect(new URL('/operator/dashboard', request.url));
     if (role === 'admin') return NextResponse.redirect(new URL('/admin/create', request.url));
   } 

@@ -1,12 +1,12 @@
 "use client";
 
-//actions
-import { login } from "@/app/actions/auth";
-
-//deps
+import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react"; // Fixed to standard React FormEvent type
 import { useRouter } from "next/navigation";
+import styles from "./page.module.css";
+
+const supabase = createClient();
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,27 +24,40 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const result = await login(email, password);
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-      if (!result.success) {
+      if (loginError) {
         setLoading(false);
 
-        if (result.isEmailNotConfirmed) {
+        if (
+          loginError.code === "email_not_confirmed" ||
+          loginError.message.toLowerCase().includes("email not confirmed")
+        ) {
           sessionStorage.setItem("signupEmail", email);
           sessionStorage.setItem("otpSource", "login");
           router.push("/otp");
           return;
         }
 
-        setError(result.error || "An error occurred during login.");
+        setError(loginError.message);
         return;
       }
 
-      router.push("/");
-      router.refresh();
+      if (!data.session) {
+        setLoading(false);
+        setError("Login did not create a session. Please try again.");
+        return;
+      }
+
+      window.location.assign("/resident/report");
     } catch (err) {
       setLoading(false);
-      setError("Something went wrong. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Something went wrong. Please try again.",
+      );
     }
   }
 
@@ -61,12 +74,12 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <main className="fixed left-0 top-0 h-lvh w-screen bg-white overflow-hidden">
+    <main className={`${styles.page} fixed left-0 top-0 h-lvh w-screen bg-white overflow-hidden`}>
       <div
         className="absolute left-0 top-0 h-lvh w-full"
         style={{ height: bgHeight }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(35,35,184,0.90)] to-white" />
+        <div className={`${styles.backdrop} absolute inset-0 bg-gradient-to-b from-[rgba(35,35,184,0.90)] to-white`} />
         <div className="absolute inset-0 bg-transparent bg-[radial-gradient(rgba(255,255,255,0.15)_2px,transparent_1px)] [background-size:24px_24px]" />
       </div>
 
@@ -82,22 +95,22 @@ export default function LoginPage() {
 
           <form 
             onSubmit={handleLogin}
-            className="bg-white/0 flex flex-col p-7 w-screen md:w-115 text-white mt-10 mb-30"
+            className={`${styles.form} bg-white/0 flex flex-col p-7 w-screen md:w-115 text-white mt-10 mb-30`}
           >
 
             {error && (
-              <p className="text-red-500 font-bold text-[14px] mb-4 bg-white/90 p-2 rounded-xl text-center shadow-sm">
+              <p className={`${styles.error} text-red-500 font-bold text-[14px] mb-4 bg-white/90 p-2 rounded-xl text-center shadow-sm`}>
                 {error}
               </p>
             )}
 
-            <label htmlFor="email">Email or Phone Number</label>
-            <input type="text" id="email" placeholder="example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} required 
-            className="text-[14px] mb-2 p-2 border border-white rounded-[3vw] md:rounded-xl focus:outline-none w-full h-12 bg-white/20" />
+            <label htmlFor="email">Email</label>
+            <input type="email" id="email" autoComplete="username" placeholder="example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} required 
+            className={`${styles.input} text-[14px] mb-2 p-2 border border-white rounded-[3vw] md:rounded-xl focus:outline-none w-full h-12 bg-white/20`} />
 
             <label htmlFor="password">Password</label>
             <input type="password" id="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required 
-            className="text-[14px] p-2 border border-white rounded-[3vw] md:rounded-xl focus:outline-none w-full h-12 bg-white/20" />
+            className={`${styles.input} text-[14px] p-2 border border-white rounded-[3vw] md:rounded-xl focus:outline-none w-full h-12 bg-white/20`} />
 
             <div className="mb-5 font-bold text-blue-700 text-right w-full cursor-pointer hover:underline text-[14px]">
               Forgot password?
@@ -106,7 +119,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="shadow-md/20 cursor-pointer mt-4 mb-3 bg-[rgb(237,41,44)] hover:bg-red-700 disabled:bg-gray-400 text-[16px] text-white font-bold py-2 px-4 rounded-[3vw] md:rounded-xl w-full h-13"
+              className={`${styles.submit} shadow-md/20 cursor-pointer mt-4 mb-3 bg-[rgb(237,41,44)] hover:bg-red-700 disabled:bg-gray-400 text-[16px] text-white font-bold py-2 px-4 rounded-[3vw] md:rounded-xl w-full h-13`}
             >
               {loading ? "Logging in..." : "Login"}
             </button>
@@ -118,7 +131,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={moveToRegister}
-              className="shadow-md/20 cursor-pointer bg-[rgb(32,32,162)] hover:bg-blue-800 text-[16px] text-white font-bold py-2 px-4 rounded-[3vw] md:rounded-xl w-full h-13"
+              className={`${styles.secondary} shadow-md/20 cursor-pointer bg-[rgb(32,32,162)] hover:bg-blue-800 text-[16px] text-white font-bold py-2 px-4 rounded-[3vw] md:rounded-xl w-full h-13`}
             >
               Register
             </button>

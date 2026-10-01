@@ -2,6 +2,7 @@
 
 //style
 import Image from "next/image";
+import styles from "./page.module.css";
 
 
 //actions
@@ -44,7 +45,7 @@ export default function LoginPage() {
     }
   }
     return (
-      <form onSubmit={handleLogin} className="relative h-screen w-full">
+      <form onSubmit={handleLogin} className={`${styles.page} relative h-screen w-full`}>
       <Image
         src="/login_bg_op.png"
         alt="Operator Login Background"
@@ -52,25 +53,25 @@ export default function LoginPage() {
         priority
         className="object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(35,35,184,0.65)] to-[rgba(202,202,202,0.50)]" />
+      <div className="absolute inset-0 bg-linear-to-t from-[rgba(35,35,184,0.65)] to-[rgba(202,202,202,0.50)]" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="grid grid-row-3 gap-4 place-items-center mb-10 max-w-sm">
+        <div className={`${styles.content} grid grid-row-3 gap-4 place-items-center mb-10 max-w-sm`}>
           <img
             src="/icon_bgl.png"
             alt="Barangay Greater Lagro"
             className="w-34 h-32 rounded-full"
           />
-          <div className="w-full bg-white p-7 py-12 rounded-lg shadow-lg/35 flex flex-col items-center">
+          <div className={`${styles.panel} w-full bg-white p-7 py-12 rounded-lg shadow-lg/35 flex flex-col items-center`}>
         
             {error && (
-              <p className="text-red-500 text-[12px] mb-2 self-start">{error}</p>
+              <p className={`${styles.error} text-[12px] mb-2 self-start`}>{error}</p>
             )}
 
-            <input id="email" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="text-[12px] mb-4 p-2 border border-gray-300 rounded w-full" />
-            <input id="password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="text-[12px] mb-4 p-2 border border-gray-300 rounded w-full" />
+            <input id="email" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={`${styles.input} text-[12px] mb-4 p-2 border border-gray-300 rounded w-full`} />
+            <input id="password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className={`${styles.input} text-[12px] mb-4 p-2 border border-gray-300 rounded w-full`} />
             
             
-            <button disabled={loading} className="cursor-pointer mt-6 bg-[rgb(32,32,162)] hover:bg-blue-800 disabled:bg-gray-400 text-[12px] text-white font-bold py-2 px-4 rounded w-full h-12" > {loading ? "Logging in..." : "Login"}</button>
+            <button disabled={loading} className={`${styles.submit} cursor-pointer mt-6 bg-[rgb(32,32,162)] hover:bg-blue-800 disabled:bg-gray-400 text-[12px] text-white font-bold py-2 px-4 rounded w-full h-12`} > {loading ? "Logging in..." : "Login"}</button>
           </div>
           <div className="w-full flex gap-3 place-items-center px-2">
             <svg
@@ -87,7 +88,7 @@ export default function LoginPage() {
                 d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
               />
             </svg>
-            <p className="w-full text-center text-white text-left grow-15">
+            <p className="w-full text-left text-white grow-15">
               Please contact your administrator if you have trouble logging in.
             </p>
           </div>

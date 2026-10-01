@@ -30,14 +30,20 @@ export async function createEmergencyRequest(category: string) {
 
   
   const ONE_MINUTE_AGO = new Date(Date.now() - 60 * 1000).toISOString();
-  const { data: existingReq } = await supabase
+  const { data: existingReq, error: existingReqError } = await supabase
     .from("tbl_emergency_req")
     .select("id, status")
     .eq("resident_id", resident.id)
+    .eq("status", "PENDING")
     .gt("created_at", ONE_MINUTE_AGO)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  if (existingReqError) {
+    console.error("Failed to check for an existing pending emergency:", existingReqError);
+    throw new Error("Could not check for an existing emergency request.");
+  }
 
   let emergencyData: EmergencyData = existingReq;
 
