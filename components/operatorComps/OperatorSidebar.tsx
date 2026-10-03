@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  BookOpen,
   History,
   LayoutDashboard,
   Megaphone,
@@ -27,6 +28,7 @@ const navigationGroups: { label: string; items: NavigationItem[] }[] = [
     items: [
       { label: "Overview", href: "/operator/dashboard", icon: LayoutDashboard },
       { label: "Emergencies", href: "/operator/emergency-requests", icon: Siren },
+      { label: "Blotter", href: "/operator/blotter", icon: BookOpen },
       { label: "History", href: "/operator/history", icon: History },
       { label: "Analytics", href: "/operator/analytics", icon: BarChart3 },
     ],

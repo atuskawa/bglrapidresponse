@@ -5,10 +5,35 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { LiveKitRoom, RoomAudioRenderer, useParticipants, useLocalParticipant, useRoomContext } from "@livekit/components-react";
 import styles from "./page.module.css";
 
-export default function OperatorCallPage({ params }: { params: Promise<{ roomId: string }> }) {
+/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+/* Placeholder for the Live Location Tracking map. Swap the inside of this
+   component for the real map later; the wrapper keeps the sizing. */
+
+function MapPlaceholder() {
+  return (
+    <div
+      role="img"
+      aria-label="Live location tracking map placeholder"
+      className={`${styles.mapPlaceholder} my-4 flex min-h-44 flex-1 flex-col items-center justify-center rounded-2xl p-4 text-center`}
+    >
+      <svg aria-hidden="true" className={`${styles.mapPin} mb-2 h-8 w-8`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+      </svg>
+      <p className={`${styles.mapTitle} text-sm font-semibold`}>Live Location Tracking</p>
+      <p className={`${styles.mapSub} mt-1 text-xs`}>Map placeholder. Resident location will appear here.</p>
+    </div>
+  );
+}
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+export default function OperatorCallPage({ params }: { params: Promise<{ "room-id": string }> }) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { roomId } = use(params);
+  const { "room-id": roomId } = use(params);
   const token = searchParams.get("token");
   const serverUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
 
@@ -73,7 +98,8 @@ function OperatorCallInterface({ roomId }: { roomId: string }) {
   };
 
   return (
-    <div className={`${styles.frame} flex flex-col h-screen max-w-5xl mx-auto p-6 md:p-10 justify-between`}>
+    /* min-h-screen instead of h-screen so the taller Session Info card can grow the page instead of overflowing */
+    <div className={`${styles.frame} flex flex-col min-h-screen max-w-5xl mx-auto p-6 md:p-10 justify-between`}>
       {/* Header */}
       <header className={`${styles.header} flex justify-between items-center w-full`}>
         <div className="flex items-center gap-3">
@@ -93,8 +119,8 @@ function OperatorCallInterface({ roomId }: { roomId: string }) {
         </div>
       </header>
 
-      {/* Main blocks */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-auto items-stretch w-full py-8">
+      {/* Main blocks: two equal columns, both cards stretch to the same height */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto items-stretch w-full py-8">
         {/* Session info */}
         <div className={`${styles.sessionCard} rounded-2xl flex flex-col justify-between`}>
           <div className="space-y-3">
@@ -108,7 +134,10 @@ function OperatorCallInterface({ roomId }: { roomId: string }) {
               <p className={`${styles.fieldValue} text-sm truncate`}>LiveKit Routing Stream</p>
             </div>
           </div>
-          <div className={`${styles.sessionDivider} mt-6 pt-4`}>
+
+          <MapPlaceholder />
+
+          <div className={`${styles.sessionDivider} pt-4`}>
             <p className={`${styles.fieldLabel} text-xs mb-2`}>Live Participants ({participants.length})</p>
             <div className="flex items-center gap-2 text-sm">
               <svg className={`${styles.mutedIcon} w-4 h-4`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
@@ -118,7 +147,7 @@ function OperatorCallInterface({ roomId }: { roomId: string }) {
         </div>
 
         {/* Live status viewport */}
-        <div className={`${styles.viewport} md:col-span-2 rounded-2xl p-6 flex flex-col items-center justify-center min-h-60 relative overflow-hidden`}>
+        <div className={`${styles.viewport} rounded-2xl p-6 flex flex-col items-center justify-center min-h-60 relative overflow-hidden`}>
           <div className="mb-4">
             <svg className={`${isResidentConnected ? styles.signalLive : styles.signalIdle} w-10 h-10 ${isResidentConnected ? "animate-bounce" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.348 14.651a3.75 3.75 0 0 1 0-5.303m5.304 0a3.75 3.75 0 0 1 0 5.303m-7.425 2.122a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.807-3.808-9.98 0-13.788m13.788 0c3.808 3.807 3.808 9.98 0 13.788M12 12h.008v.008H12V12Z" /></svg>
           </div>
@@ -144,6 +173,7 @@ function OperatorCallInterface({ roomId }: { roomId: string }) {
       <footer className={`${styles.controls} flex justify-center gap-4 pt-4 border-t w-full`}>
         <button
           onClick={toggleMute}
+          aria-pressed={isMuted}
           className={`${styles.controlButton} ${isMuted ? styles.muted : ""} flex items-center gap-2 px-6 py-3 rounded-xl border text-sm font-medium`}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

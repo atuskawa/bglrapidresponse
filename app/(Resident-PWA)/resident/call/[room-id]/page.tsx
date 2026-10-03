@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState, useEffect } from "react"; 
+import React, { use, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { 
   LiveKitRoom, 
@@ -12,13 +12,13 @@ import {
 import styles from "./page.module.css";
 
 interface PageProps {
-  params: Promise<{ roomId: string }>; 
+  params: Promise<{ "room-id": string }>;
 }
 
 export default function CallPage({ params }: PageProps) {
   const searchParams = useSearchParams();
   const unwrappedParams = use(params);
-  const roomId = unwrappedParams.roomId;
+  const roomId = unwrappedParams["room-id"];
   
   const token = searchParams.get("token");
   const serverUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
